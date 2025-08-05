@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importer Fichiers Excel</title>
-
+    <title>Import & Recherche</title>
     <style>
-        body {
+        body { font-family: Arial; text-align: center; }
+        form { margin: 20px auto; padding: 10px; }
+        input[type="file"], input[type="search"], input[type="submit"], button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .result, .message { margin-top: 20px; font-size: 18px; }
+ body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -87,32 +92,49 @@
         footer p {
             margin: 5px 0;
         }
+
     </style>
 </head>
 <body>
 
     <nav>
-        <a href="/home">Accueil</a>
-        <a href="/search">Recherche</a>
-        <a href="">Charger Fichiers</a>
-        <a href="/searchfile">Recherche Manuelle</a>
-    </nav>
+    <a href="/home">Accueil</a>
+    <a href="/searchdb">Recherche</a>
+    <a href="/importer">ChargerFichiers</a>
+    <a href="">RechercheManuelle</a>
+</nav>
+    <h2>1. Importer des fichiers Excel</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="fichiers" multiple required>
+        <button type="submit">Importer</button>
+    </form>
 
-    <main>
-        <div class="upload-container">
-            <h1>Importer des fichiers Excel</h1>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="fichiers" multiple required><br><br>
-                <button type="submit">Importer</button>
-            </form>
-        </div>
-    </main>
+    {% if message %}
+        <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <h2>2. Rechercher dans les commentaires</h2>
+    <form method="get">
+        <input type="search" name="q" placeholder="Rechercher" value="{{ query }}">
+        <input type="submit" value="🔍 Rechercher">
+    </form>
+
+   
+{% if cause %}
+    <div class="result">
+        <h2>Cause la plus fréquente : {{ cause }}</h2>
+        <p><strong>Nombre d'occurrences :</strong> {{ total }}</p>
+        <p><strong>Exemple de commentaire :</strong></p>
+        <p>{{ commentaire }}</p>
+    </div>
+{% elif query %}
+    <p class="no-result">Aucun résultat trouvé pour "<em>{{ query }}</em>"</p>
+{% endif %}
 
     <footer>
         <p>Créé par Papa Abdoulaye BARRY</p>
         <p>&copy; 2025 | Contact : papa.a.barry@gmail.com</p>
     </footer>
-
 </body>
 </html>

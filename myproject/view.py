@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from search.models import Derangement
 from django.db.models import Count
+
 def index(request):
     return render(request,'accueil.html')
 
@@ -34,5 +35,8 @@ def searchdb(request):
         'total': total,
         'query': query
     })
-
-
+def login(request):
+    return render(request,'login.html')
+    
+def signup(request):
+    return render(request,'inscription.html')

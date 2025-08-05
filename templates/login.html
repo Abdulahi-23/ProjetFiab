@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoginPage</title>
+    <style>
+        form{
+            display: flex;
+            justify-content: center;
+            border: 1px solid;
+            margin: 20%;
+            flex-direction: column;
+        }
+        input{
+            display: flex;
+            justify-content: center;
+            
+        }
+        a{
+            display: flex;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <form action="/home">
+        <input type="text" placeholder="Username ou Courrier">
+        <input type="text" placeholder="Mot de passe">
+        <input type="submit" value="Se connecter">
+        <a href="">Mot de passe oublié?</a>
+    </form>
+    <form action="/signup">
+        <input type="submit" value="S'inscrire" >
+    </form>
+</body>
+</html>

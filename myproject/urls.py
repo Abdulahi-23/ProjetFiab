@@ -19,16 +19,11 @@ from django.urls import path
 from myproject import view
 from django.conf.urls.static import static
 from django.conf import settings
-from search import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('home/',view.index,name="home"),
-    path('search/', view.searchdb),
-    path('importer/',views.importer_excels),
-    path('searchfile/',views.upload_et_recherche),
-    path('',view.login),
-    path('signup/',view.signup),
+    path('',view.traiter_export),
     # tes autres urls ici
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 

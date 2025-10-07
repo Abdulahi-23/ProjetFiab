@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Projet FIAB – Analyse Export Fibre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- RESET & BASE --- */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      color: #f1f5f9;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* --- CONTAINER PRINCIPAL --- */
+    .form-wrapper {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      padding: 40px 60px;
+      width: 420px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* --- EN-TÊTE "PROJET FIAB" --- */
+    .header {
+      position: absolute;
+      top: -60px;
+      left: 20px;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.3rem;
+      background: linear-gradient(90deg, #06b6d4, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+
+    /* --- TITRE --- */
+    h2 {
+      margin-bottom: 25px;
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 1.4rem;
+    }
+
+    /* --- FORMULAIRE --- */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f1f5f9;
+    }
+
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      background: linear-gradient(90deg, #06b6d4, #7c3aed);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      margin-top: 15px;
+      font-size: 0.85em;
+      color: #94a3b8;
+    }
+
+    /* --- MESSAGES --- */
+    .message {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .message.error {
+      background-color: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+
+    .message.success {
+      background-color: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #4ade80;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      .form-wrapper {
+        width: 90%;
+        padding: 30px 20px;
+      }
+
+      .header {
+        position: static;
+        margin-bottom: 20px;
+      }
+
+      .logo-text {
+        font-size: 1.2rem;
+        display: inline-block;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      button {
+        font-size: 0.95rem;
+      }
+
+      input[type="file"] {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-wrapper">
+    <div class="header">
+      <span class="logo-text">Projet <strong>FIAB</strong></span>
+    </div>
+
+    <h2>Analyse de conformité PBO</h2>
+
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" id="submitBtn">Envoyer</button>
+      <div id="messageBox" class="message"></div>
+    </form>
+
+    <div class="footer">© 2025 – Outil interne FIAB</div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const button = document.getElementById('submitBtn');
+    const fileInput = document.querySelector('input[type="file"]');
+    const messageBox = document.getElementById('messageBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fileName = fileInput.value.split('\\').pop();
+      const extension = fileName.split('.').pop().toLowerCase();
+
+      if (!fileInput.value) {
+        showMessage("Veuillez sélectionner un fichier avant d’envoyer.", "error");
+        return;
+      }
+
+      if (extension !== "xlsx") {
+        showMessage("⚠️ Merci d’uploader un fichier avec l’extension .xlsx", "error");
+        fileInput.value = "";
+        return;
+      }
+
+      button.disabled = true;
+      button.innerText = "Traitement en cours...";
+      button.style.opacity = "0.7";
+      showMessage("", "");
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action || window.location.href, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          showMessage("⚠️ Une erreur est survenue lors du traitement.", "error");
+          resetForm();
+          return;
+        }
+
+        const blob = await response.blob();
+
+        if (response.headers.get("Content-Type").includes("spreadsheet")) {
+          const contentDisposition = response.headers.get("Content-Disposition");
+          const fileNameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+          const downloadName = fileNameMatch ? fileNameMatch[1] : "resultat.xlsx";
+
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = downloadName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+
+          showMessage("✅ Fichier traité et téléchargé avec succès !", "success");
+        } else {
+          showMessage("⚠️ Le serveur n’a pas renvoyé de fichier Excel.", "error");
+        }
+
+      } catch (error) {
+        showMessage("❌ Erreur réseau ou serveur !", "error");
+      }
+
+      resetForm();
+    });
+
+    function resetForm() {
+      button.disabled = false;
+      button.innerText = "Envoyer";
+      button.style.opacity = "1";
+      fileInput.value = "";
+    }
+
+    function showMessage(text, type) {
+      if (!text) {
+        messageBox.style.display = "none";
+        return;
+      }
+      messageBox.innerText = text;
+      messageBox.className = `message ${type}`;
+      messageBox.style.display = "block";
+
+      // Disparition automatique après 5s
+      setTimeout(() => {
+        messageBox.style.display = "none";
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

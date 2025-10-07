@@ -1,2 +1,7 @@
 django
 gunicorn
+pandas
+datetime
+logging
+os
+unicodedata

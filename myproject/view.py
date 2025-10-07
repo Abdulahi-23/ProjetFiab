@@ -6,10 +6,12 @@ import datetime
 import logging
 import os
 import unicodedata
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-fichier_totalite = os.path.join(BASE_DIR, "Totalité_fibres.xlsx")
+
+fichier_totalite = os.path.join(settings.BASE_DIR, "Totalité_fibres.xlsx")
+
 
 # --- EXCEPTIONS ---
 exceptions_numero_serie = [

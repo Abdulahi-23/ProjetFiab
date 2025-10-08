@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-fg!8kg8h(i)x9b*ivasg@ta2(x#i5a8$2j##dm0di+q@q&b@^a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['projetfiab-sgyo.onrender.com', 'localhost']
+ALLOWED_HOSTS = ['projetfiab-sgyo.onrender.com', 'localhost','127.0.0.1']
 
 
 # Application definition
@@ -130,14 +130,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
-
-
-
-
-# Dossier où collectstatic va placer les fichiers
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 
 
 # Default primary key field type

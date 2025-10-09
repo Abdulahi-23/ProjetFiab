@@ -96,41 +96,65 @@ def motif(row):
 
 
 def analyser_fibres(df_totalite, df_export):
+    df_totalite = df_totalite.copy().reset_index(drop=True)
+    df_export = df_export.copy().reset_index(drop=True)
+
+    # Nettoyage
     df_totalite['nom_eqpt'] = df_totalite['nom_eqpt'].astype(str).str.strip().str.upper()
     df_totalite['plaque'] = df_totalite['plaque'].astype(str).str.strip().str.upper()
     df_export['pbo'] = df_export['pbo'].astype(str).str.strip().str.upper()
     df_export['plaque'] = df_export['plaque'].astype(str).str.strip().str.upper()
-    
+
     df_export['fibre'] = pd.to_numeric(df_export['fibre'], errors='coerce')
     df_export = df_export.dropna(subset=['fibre'])
     df_export['fibre'] = df_export['fibre'].astype(int)
 
-    couples_export = set(df_export[['pbo','plaque']].itertuples(index=False, name=None))
-    results = {}
-    for _, row in df_totalite.iterrows():
-        pbo, plaque, total_brin = row['nom_eqpt'], row['plaque'], row['total_brin']
-        if (pbo, plaque) not in couples_export:
-            results[(pbo, plaque)] = {
-                "Completude": "INCONNU",
-                "Fibres_manquantes": "INCONNU",
-                "total_brin": total_brin
-            }
-            continue
-        fibres_presentes = df_export[
-            (df_export['pbo'] == pbo) &
-            (df_export['plaque'] == plaque) &
-            (df_export['fibre'] > 0) &
-            (df_export['fibre'] <= total_brin)
-        ]['fibre'].unique()
-        fibres_presentes = sorted(fibres_presentes)
-        fibres_attendues = list(range(1, int(total_brin)+1)) if pd.notna(total_brin) else []
-        fibres_manquantes = sorted(set(fibres_attendues) - set(fibres_presentes))
-        completude = "COMPLET" if len(fibres_presentes) == total_brin else "INCOMPLET"
-        results[(pbo, plaque)] = {
-            "Completude": completude,
-            "Fibres_manquantes": ", ".join(map(str, fibres_manquantes)) or "Aucune",
-            "total_brin": total_brin,
+    # Jointure entre la totalité et l'export
+    merged = df_totalite.merge(
+        df_export,
+        how="left",
+        left_on=["nom_eqpt", "plaque"],
+        right_on=["pbo", "plaque"]
+    )
+
+    # Calcul des fibres présentes
+    fibres_par_pbo = (
+        merged.groupby(["nom_eqpt", "plaque"])["fibre"]
+        .apply(lambda x: sorted(x.dropna().unique().tolist()))
+        .reset_index()
+    )
+
+    df_totalite = df_totalite.merge(fibres_par_pbo, on=["nom_eqpt", "plaque"], how="left")
+
+    # Calcul des fibres attendues et manquantes
+    df_totalite["fibres_attendues"] = df_totalite["total_brin"].apply(
+        lambda x: list(range(1, int(x) + 1)) if pd.notna(x) else []
+    )
+    df_totalite["fibres_manquantes"] = df_totalite.apply(
+        lambda r: sorted(set(r["fibres_attendues"]) - set(r["fibre"] or []))
+        if isinstance(r["fibres_attendues"], list)
+        else [],
+        axis=1
+    )
+
+    # Completude
+    df_totalite["Completude"] = df_totalite.apply(
+        lambda r: "COMPLET"
+        if isinstance(r["fibres_attendues"], list)
+        and len(r["fibres_attendues"]) == len(r["fibre"] or [])
+        else "INCOMPLET",
+        axis=1,
+    )
+
+    results = {
+        (r["nom_eqpt"], r["plaque"]): {
+            "Completude": r["Completude"],
+            "Fibres_manquantes": ", ".join(map(str, r["fibres_manquantes"])) or "Aucune",
+            "total_brin": r["total_brin"],
         }
+        for _, r in df_totalite.iterrows()
+    }
+
     return results
 
 

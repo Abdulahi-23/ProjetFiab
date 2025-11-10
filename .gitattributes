@@ -1,0 +1,7 @@
+
+/static/* linguist-vendored
+/build/* linguist-vendored
+/node_modules/* linguist-vendored
+
+
+*.js linguist-vendored

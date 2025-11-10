@@ -5,8 +5,8 @@
 /node_modules/* linguist-vendored
 
 # Ignore fichiers CSS et JS
-*.css linguist-vendored
+
 *.js linguist-vendored
 
 # Si tu as du HTML statique
-*.html linguist-vendored
+

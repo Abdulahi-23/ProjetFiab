@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 
-fichier_totalite = os.path.join(settings.BASE_DIR, "static", "Totalité_fibres.xlsx")
+fichier_totalite = os.path.join(settings.BASE_DIR, "staticfiles", "Totalité_fibres.xlsx")
 
 
 

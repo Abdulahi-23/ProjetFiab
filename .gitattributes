@@ -1,7 +1,12 @@
-
+# Ignore tous les fichiers front-end et auto-générés
 /static/* linguist-vendored
 /build/* linguist-vendored
+/dist/* linguist-vendored
 /node_modules/* linguist-vendored
 
-
+# Ignore fichiers CSS et JS
+*.css linguist-vendored
 *.js linguist-vendored
+
+# Si tu as du HTML statique
+*.html linguist-vendored
